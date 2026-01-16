@@ -35,7 +35,7 @@ export default function ProfilePage() {
   ];
 
   const handleSaveProfile = () => {
-    setName(tempName);
+    setName(tempName, user?.id);
     setIsEditing(false);
   };
 
@@ -114,7 +114,7 @@ export default function ProfilePage() {
               {avatars.map((img, i) => (
                 <button
                   key={i}
-                  onClick={() => setAvatar(img)}
+                  onClick={() => setAvatar(img, user?.id)}
                   className={cn(
                     "w-12 h-12 rounded-full overflow-hidden border-2 shrink-0 transition-all hover:scale-110",
                     displayAvatar === img ? "border-primary" : "border-white/10 hover:border-white/30"

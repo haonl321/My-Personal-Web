@@ -17,7 +17,10 @@ interface AddTodoModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
+import { useUser } from '@clerk/nextjs';
+
 export function AddTodoModal({ open, onOpenChange }: AddTodoModalProps) {
+  const { user } = useUser();
   const { addTask } = useTodoStore();
   
   const [formData, setFormData] = useState({
@@ -60,7 +63,7 @@ export function AddTodoModal({ open, onOpenChange }: AddTodoModalProps) {
 
     const newTask: TodoTask = {
       id: crypto.randomUUID(),
-      user_id: 'user_1',
+      user_id: user?.id || 'anonymous',
       title: formData.title,
       description: formData.description,
       is_completed: false,

@@ -19,6 +19,8 @@ export const metadata: Metadata = {
   description: "Keep moving forward! A failure tracking app inspired by Disney's Meet the Robinsons.",
 };
 
+import { SyncProvider } from "@/components/providers/SyncProvider";
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -37,7 +39,9 @@ export default function RootLayout({
             enableSystem={false}
             disableTransitionOnChange
           >
-            {children}
+            <SyncProvider>
+              {children}
+            </SyncProvider>
           </ThemeProvider>
         </body>
       </html>

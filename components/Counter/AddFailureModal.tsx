@@ -20,7 +20,10 @@ interface AddFailureModalProps {
   onOpenChange: (open: boolean) => void;
 }
 
+import { useUser } from '@clerk/nextjs';
+
 export function AddFailureModal({ open, onOpenChange }: AddFailureModalProps) {
+  const { user } = useUser();
   const { increment, count } = useCounterStore();
   const { addFailure } = useTimelineStore();
 
@@ -54,7 +57,7 @@ export function AddFailureModal({ open, onOpenChange }: AddFailureModalProps) {
 
     const newEntry: DetailedFailureEntry = {
       id: crypto.randomUUID(),
-      user_id: 'user_1', // Mock user id
+      user_id: user?.id || 'anonymous',
       count: count + 1,
       occurred_at: new Date().toISOString(),
       category_id: formData.categoryId,
