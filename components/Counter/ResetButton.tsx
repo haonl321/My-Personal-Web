@@ -14,14 +14,10 @@ import {
 } from "@/components/ui/dialog";
 
 export function ResetButton() {
-  const { reset } = useCounterStore();
-  // We might not want to clear timeline on reset, just the counter? 
-  // Usually "Reset" means start over towards the goal (124).
-  // The timeline should probably persist to show history of failures over time.
-  // We'll clarify: "Reset Counter" only.
+  const { clearAllFailures } = useTimelineStore();
 
   const handleReset = () => {
-    reset();
+    clearAllFailures();
   };
 
   return (
@@ -33,10 +29,10 @@ export function ResetButton() {
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Reset Counter?</DialogTitle>
+          <DialogTitle>Reset Counter & History?</DialogTitle>
           <DialogDescription>
-            This will reset your current failure count to 0. Your history will be preserved.
-            "Keep moving forward!"
+            This will permanently delete ALL recorded failures from your history.
+            "A clean slate for a fresh start!"
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>

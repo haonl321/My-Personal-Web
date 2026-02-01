@@ -30,11 +30,11 @@ export async function POST(request: Request) {
       `INSERT INTO user_settings (user_id, custom_name, custom_avatar, updated_at)
        VALUES ($1, $2, $3, NOW())
        ON CONFLICT (user_id) DO UPDATE SET
-       custom_name = EXCLUDED.custom_name,
-       custom_avatar = EXCLUDED.custom_avatar,
+       custom_name = COALESCE(EXCLUDED.custom_name, user_settings.custom_name),
+       custom_avatar = COALESCE(EXCLUDED.custom_avatar, user_settings.custom_avatar),
        updated_at = NOW()
        RETURNING *`,
-      [user_id, custom_name, custom_avatar]
+      [user_id, custom_name || null, custom_avatar || null]
     );
 
     return NextResponse.json(result.rows[0]);

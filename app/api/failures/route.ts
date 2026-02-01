@@ -54,7 +54,11 @@ export async function DELETE(request: Request) {
   }
 
   try {
-    await pool.query('DELETE FROM failures WHERE id = $1 AND user_id = $2', [id, userId]);
+    if (id === 'all') {
+      await pool.query('DELETE FROM failures WHERE user_id = $1', [userId]);
+    } else {
+      await pool.query('DELETE FROM failures WHERE id = $1 AND user_id = $2', [id, userId]);
+    }
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Database error:', error);

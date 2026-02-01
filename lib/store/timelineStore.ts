@@ -11,6 +11,7 @@ interface TimelineState {
   setUserId: (id: string | null) => void;
   addFailure: (entry: DetailedFailureEntry) => Promise<void>;
   removeFailure: (id: string) => Promise<void>;
+  clearAllFailures: () => Promise<void>;
   setFailures: (failures: DetailedFailureEntry[]) => void;
   loadFromSupabase: (userId: string) => Promise<void>;
 }
@@ -43,6 +44,15 @@ export const useTimelineStore = create<TimelineState>()(
         useCounterStore.getState().decrement();
         if (userId) {
           await fetch(`/api/failures?id=${id}&userId=${userId}`, { method: 'DELETE' });
+        }
+      },
+
+      clearAllFailures: async () => {
+        const { userId } = get();
+        set({ failures: [] });
+        useCounterStore.getState().reset();
+        if (userId) {
+          await fetch(`/api/failures?id=all&userId=${userId}`, { method: 'DELETE' });
         }
       },
 
