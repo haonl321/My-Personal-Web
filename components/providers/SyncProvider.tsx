@@ -32,11 +32,9 @@ export function SyncProvider({ children }: { children: React.ReactNode }) {
           timelineStore.loadFromSupabase(userId),
         ]);
         
-        // Update counter based on failures length if it's 0 or sync needed
+        // Update counter based on failures length
         const failureCount = timelineStore.failures.length;
-        if (failureCount > 0) {
-            counterStore.setCount(failureCount);
-        }
+        counterStore.setCount(failureCount);
       };
 
       initData();

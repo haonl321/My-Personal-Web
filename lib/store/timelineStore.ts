@@ -3,6 +3,8 @@ import { persist } from 'zustand/middleware';
 import { DetailedFailureEntry } from '../types/failure';
 import { supabase } from '@/lib/db/supabase';
 
+import { useCounterStore } from './counterStore';
+
 interface TimelineState {
   failures: DetailedFailureEntry[];
   userId: string | null;
@@ -23,6 +25,7 @@ export const useTimelineStore = create<TimelineState>()(
       addFailure: async (entry) => {
         const { userId } = get();
         set((state) => ({ failures: [entry, ...state.failures] }));
+        useCounterStore.getState().increment();
         if (userId) {
           await fetch('/api/failures', {
             method: 'POST',
@@ -37,6 +40,7 @@ export const useTimelineStore = create<TimelineState>()(
         set((state) => ({ 
           failures: state.failures.filter((f) => f.id !== id) 
         }));
+        useCounterStore.getState().decrement();
         if (userId) {
           await fetch(`/api/failures?id=${id}&userId=${userId}`, { method: 'DELETE' });
         }
