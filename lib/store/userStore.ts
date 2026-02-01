@@ -18,31 +18,28 @@ export const useUserStore = create<UserState>()(
       setName: async (name, userId) => {
         set({ customName: name });
         if (userId) {
-          await supabase.from('profiles').upsert({ 
-            user_id: userId, 
-            custom_name: name,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'user_id' });
+          await fetch('/api/profiles', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userId, custom_name: name }),
+          });
         }
       },
       setAvatar: async (avatar, userId) => {
         set({ customAvatar: avatar });
         if (userId) {
-          await supabase.from('profiles').upsert({ 
-            user_id: userId, 
-            custom_avatar: avatar,
-            updated_at: new Date().toISOString()
-          }, { onConflict: 'user_id' });
+          await fetch('/api/profiles', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ user_id: userId, custom_avatar: avatar }),
+          });
         }
       },
       loadFromSupabase: async (userId) => {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('custom_name, custom_avatar')
-          .eq('user_id', userId)
-          .single();
+        const response = await fetch(`/api/profiles?userId=${userId}`);
+        const data = await response.json();
         
-        if (data && !error) {
+        if (data) {
           set({ 
             customName: data.custom_name || '', 
             customAvatar: data.custom_avatar || '' 

@@ -24,17 +24,10 @@ export const useTimelineStore = create<TimelineState>()(
         const { userId } = get();
         set((state) => ({ failures: [entry, ...state.failures] }));
         if (userId) {
-          await supabase.from('failures').insert({
-            id: entry.id,
-            user_id: userId,
-            title: entry.title,
-            description: entry.description,
-            category_id: entry.category_id,
-            mood: entry.mood,
-            severity: entry.severity,
-            lesson: entry.lesson,
-            action_plan: entry.action_plan,
-            occurred_at: entry.occurred_at
+          await fetch('/api/failures', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...entry, user_id: userId }),
           });
         }
       },
@@ -45,20 +38,17 @@ export const useTimelineStore = create<TimelineState>()(
           failures: state.failures.filter((f) => f.id !== id) 
         }));
         if (userId) {
-          await supabase.from('failures').delete().eq('id', id).eq('user_id', userId);
+          await fetch(`/api/failures?id=${id}&userId=${userId}`, { method: 'DELETE' });
         }
       },
 
       setFailures: (failures) => set({ failures }),
 
       loadFromSupabase: async (userId) => {
-        const { data, error } = await supabase
-          .from('failures')
-          .select('*')
-          .eq('user_id', userId)
-          .order('occurred_at', { ascending: false });
+        const response = await fetch(`/api/failures?userId=${userId}`);
+        const data = await response.json();
         
-        if (data && !error) {
+        if (Array.isArray(data)) {
           const formattedFailures: DetailedFailureEntry[] = data.map(item => ({
             id: item.id,
             user_id: item.user_id,

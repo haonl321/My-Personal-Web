@@ -29,16 +29,10 @@ export const useTodoStore = create<TodoState>()(
         const { userId } = get();
         set((state) => ({ tasks: [task, ...state.tasks] }));
         if (userId) {
-          await supabase.from('todos').insert({
-            user_id: userId,
-            title: task.title,
-            description: task.description,
-            due_date: task.due_date,
-            due_time: task.due_time,
-            priority: task.priority,
-            category_id: task.category_id,
-            is_completed: task.is_completed,
-            created_at: task.created_at
+          await fetch('/api/todos', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...task, user_id: userId }),
           });
         }
       },
@@ -49,16 +43,11 @@ export const useTodoStore = create<TodoState>()(
           tasks: state.tasks.map((t) => (t.id === id ? { ...t, ...updates, updated_at: new Date().toISOString() } : t)),
         }));
         if (userId) {
-          await supabase.from('todos').update({
-            title: updates.title,
-            description: updates.description,
-            due_date: updates.due_date,
-            due_time: updates.due_time,
-            priority: updates.priority,
-            category_id: updates.category_id,
-            is_completed: updates.is_completed,
-            updated_at: new Date().toISOString()
-          }).eq('id', id).eq('user_id', userId);
+          await fetch('/api/todos', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, user_id: userId, ...updates }),
+          });
         }
       },
 
@@ -66,7 +55,7 @@ export const useTodoStore = create<TodoState>()(
         const { userId } = get();
         set((state) => ({ tasks: state.tasks.filter((t) => t.id !== id) }));
         if (userId) {
-          await supabase.from('todos').delete().eq('id', id).eq('user_id', userId);
+          await fetch(`/api/todos?id=${id}&userId=${userId}`, { method: 'DELETE' });
         }
       },
 
@@ -92,25 +81,38 @@ export const useTodoStore = create<TodoState>()(
         }));
 
         if (userId) {
-          await supabase.from('todos').update({
-            is_completed: newStatus,
-            completed_at: newStatus ? updatedAt : null,
-            updated_at: updatedAt
-          }).eq('id', id).eq('user_id', userId);
+          await fetch('/api/todos', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ id, user_id: userId, is_completed: newStatus, completed_at: newStatus ? updatedAt : null }),
+          });
         }
       },
 
-      addCategory: (category) => set((state) => ({ categories: [...state.categories, category] })),
-      removeCategory: (id) => set((state) => ({ categories: state.categories.filter((c) => c.id !== id) })),
+      addCategory: async (category) => {
+        const { userId } = get();
+        set((state) => ({ categories: [...state.categories, category] }));
+        if (userId) {
+          await fetch('/api/categories', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...category, user_id: userId }),
+          });
+        }
+      },
+      removeCategory: async (id) => {
+        const { userId } = get();
+        set((state) => ({ categories: state.categories.filter((c) => c.id !== id) }));
+        if (userId) {
+          await fetch(`/api/categories?id=${id}&userId=${userId}`, { method: 'DELETE' });
+        }
+      },
 
       loadFromSupabase: async (userId) => {
-        const { data, error } = await supabase
-          .from('todos')
-          .select('*')
-          .eq('user_id', userId)
-          .order('created_at', { ascending: false });
+        const response = await fetch(`/api/todos?userId=${userId}`);
+        const data = await response.json();
         
-        if (data && !error) {
+        if (Array.isArray(data)) {
           const formattedTasks: TodoTask[] = data.map(item => ({
             id: item.id,
             user_id: item.user_id,
@@ -131,6 +133,12 @@ export const useTodoStore = create<TodoState>()(
             attachments: item.attachments || []
           }));
           set({ tasks: formattedTasks });
+        }
+
+        const catResponse = await fetch(`/api/categories?userId=${userId}`);
+        const catData = await catResponse.json();
+        if (Array.isArray(catData) && catData.length > 0) {
+          set({ categories: catData });
         }
       }
     }),
