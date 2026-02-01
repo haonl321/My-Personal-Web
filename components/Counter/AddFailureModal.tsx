@@ -71,7 +71,6 @@ export function AddFailureModal({ open, onOpenChange }: AddFailureModalProps) {
     };
 
     addFailure(newEntry);
-    increment();
     toast.success("Resilience entry saved!");
 
     if (shouldContinue) {
