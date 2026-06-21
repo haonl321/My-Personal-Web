@@ -3,10 +3,11 @@
 import { useState } from "react";
 import { TodoList } from "@/components/Todo/TodoList";
 import { AddTodoModal } from "@/components/Todo/AddTodoModal";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { motion } from "framer-motion";
-import { Plus, Search, Settings, Filter, Calendar as CalendarIcon, CheckCircle2 } from "lucide-react";
+import { Plus, Search, Settings, Filter, Calendar as CalendarIcon, CheckCircle2, TrendingUp } from "lucide-react";
 import { format } from "date-fns";
 import { useTodoStore } from "@/lib/store/todoStore";
 import { Progress } from "@/components/ui/progress";
@@ -146,6 +147,3 @@ function FilterButton({ active, onClick, label }: any) {
     </button>
   );
 }
-
-import { TrendingUp } from "lucide-react";
-import Link from "next/link";

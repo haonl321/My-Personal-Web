@@ -64,7 +64,7 @@ export function FailureChart() {
       </CardHeader>
       <CardContent className="pl-2">
         <div className="h-[250px] w-full">
-          <ResponsiveContainer width="100%" height="100%">
+          <ResponsiveContainer width="100%" height="100%" minWidth={0}>
             <ComposedChart data={data}>
               <XAxis 
                 dataKey="name" 

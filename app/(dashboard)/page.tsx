@@ -7,6 +7,7 @@ import { motion } from "framer-motion";
 import { useCounterStore } from "@/lib/store/counterStore";
 import { useTodoStore } from "@/lib/store/todoStore";
 import { useTimelineStore } from "@/lib/store/timelineStore";
+import { useOpportunitiesStore } from "@/lib/store/opportunitiesStore";
 import { differenceInDays } from "date-fns";
 
 export default function HubPage() {
@@ -14,6 +15,7 @@ export default function HubPage() {
   const { count } = useCounterStore();
   const { tasks } = useTodoStore();
   const { failures } = useTimelineStore();
+  const { opportunities } = useOpportunitiesStore();
 
   const pendingTasks = tasks.filter(t => !t.is_completed).length;
   
@@ -29,6 +31,12 @@ export default function HubPage() {
     differenceInDays(new Date(), new Date(t.completed_at)) === 0
   ).length;
 
+  // Calculate opportunities this week
+  const opportunitiesCount = opportunities.length;
+  const opportunitiesThisWeek = opportunities.filter(o => 
+    differenceInDays(new Date(), new Date(o.occurred_at)) <= 7
+  ).length;
+
   return (
     <div className="w-full max-w-4xl space-y-12">
       <header className="text-center space-y-4">
@@ -42,11 +50,11 @@ export default function HubPage() {
         <p className="text-white/70 text-lg italic">"Your destiny is what you make it."</p>
       </header>
 
-      <div className="grid md:grid-cols-2 gap-8">
+      <div className="grid md:grid-cols-3 gap-6">
         {/* Failure Tracker Card */}
         <ModuleCard 
           title="FAILURE TRACKER"
-          description={`${count} failures tracked`}
+          description={`${count} failures`}
           icon={<Sparkles className="w-12 h-12 text-primary" />}
           href="/failures"
           color="hover:border-primary/50"
@@ -54,10 +62,21 @@ export default function HubPage() {
           stats={`${failuresThisWeek} this week`}
         />
 
+        {/* Missed Opportunities Card */}
+        <ModuleCard 
+          title="OPPORTUNITIES"
+          description={`${opportunitiesCount} missed`}
+          icon={<Zap className="w-12 h-12 text-yellow-400" />}
+          href="/opportunities"
+          color="hover:border-yellow-400/50"
+          accent="bg-yellow-400/10"
+          stats={`${opportunitiesThisWeek} this week`}
+        />
+
         {/* Todo List Card */}
         <ModuleCard 
           title="TODO LIST"
-          description={`${pendingTasks} tasks pending`}
+          description={`${pendingTasks} pending`}
           icon={<CheckCircle className="w-12 h-12 text-secondary" />}
           href="/todos"
           color="hover:border-secondary/50"

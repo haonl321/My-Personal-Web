@@ -55,8 +55,22 @@ create table if not exists todo_categories (
   created_at timestamp with time zone default now() not null
 );
 
+-- Create table for missed opportunities
+create table if not exists missed_opportunities (
+  id uuid primary key default gen_random_uuid(),
+  user_id text not null,
+  title text not null,
+  description text,
+  reason text not null,
+  regret_level integer default 3,
+  lesson text,
+  action_plan text,
+  occurred_at timestamp with time zone default now() not null
+);
+
 -- Indexes for performance
 create index if not exists failures_user_id_idx on failures(user_id);
 create index if not exists favorite_quotes_user_id_idx on favorite_quotes(user_id);
 create index if not exists todos_user_id_idx on todos(user_id);
 create index if not exists todo_categories_user_id_idx on todo_categories(user_id);
+create index if not exists missed_opportunities_user_id_idx on missed_opportunities(user_id);
