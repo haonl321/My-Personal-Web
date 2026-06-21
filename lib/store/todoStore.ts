@@ -113,26 +113,37 @@ export const useTodoStore = create<TodoState>()(
         const data = await response.json();
         
         if (Array.isArray(data)) {
-          const formattedTasks: TodoTask[] = data.map(item => ({
-            id: item.id,
-            user_id: item.user_id,
-            title: item.title,
-            description: item.description,
-            due_date: item.due_date,
-            due_time: item.due_time,
-            priority: item.priority,
-            category_id: item.category_id,
-            is_completed: item.is_completed,
-            completed_at: item.completed_at,
-            created_at: item.created_at,
-            updated_at: item.updated_at,
-            tags: item.tags || [],
-            is_recurring: item.is_recurring || false,
-            reminders: item.reminders || [],
-            subtasks: item.subtasks || [],
-            attachments: item.attachments || []
-          }));
-          set({ tasks: formattedTasks });
+          if (data.length === 0 && get().tasks.length > 0) {
+            console.log("Syncing local todos to Supabase...");
+            for (const task of get().tasks) {
+              await fetch('/api/todos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...task, user_id: userId }),
+              });
+            }
+          } else {
+            const formattedTasks: TodoTask[] = data.map(item => ({
+              id: item.id,
+              user_id: item.user_id,
+              title: item.title,
+              description: item.description,
+              due_date: item.due_date,
+              due_time: item.due_time,
+              priority: item.priority,
+              category_id: item.category_id,
+              is_completed: item.is_completed,
+              completed_at: item.completed_at,
+              created_at: item.created_at,
+              updated_at: item.updated_at,
+              tags: item.tags || [],
+              is_recurring: item.is_recurring || false,
+              reminders: item.reminders || [],
+              subtasks: item.subtasks || [],
+              attachments: item.attachments || []
+            }));
+            set({ tasks: formattedTasks });
+          }
         }
 
         const catResponse = await fetch(`/api/categories?userId=${userId}`);

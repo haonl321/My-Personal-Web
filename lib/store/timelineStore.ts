@@ -63,22 +63,33 @@ export const useTimelineStore = create<TimelineState>()(
         const data = await response.json();
         
         if (Array.isArray(data)) {
-          const formattedFailures: DetailedFailureEntry[] = data.map(item => ({
-            id: item.id,
-            user_id: item.user_id,
-            count: item.count || 1,
-            occurred_at: item.occurred_at,
-            category_id: item.category_id,
-            title: item.title,
-            description: item.description,
-            mood: item.mood,
-            severity: item.severity,
-            lesson: item.lesson,
-            action_plan: item.action_plan,
-            tags: item.tags || [],
-            image_url: item.image_url
-          }));
-          set({ failures: formattedFailures });
+          if (data.length === 0 && get().failures.length > 0) {
+            console.log("Syncing local failures to Supabase...");
+            for (const entry of get().failures) {
+              await fetch('/api/failures', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ ...entry, user_id: userId }),
+              });
+            }
+          } else {
+            const formattedFailures: DetailedFailureEntry[] = data.map(item => ({
+              id: item.id,
+              user_id: item.user_id,
+              count: item.count || 1,
+              occurred_at: item.occurred_at,
+              category_id: item.category_id,
+              title: item.title,
+              description: item.description,
+              mood: item.mood,
+              severity: item.severity,
+              lesson: item.lesson,
+              action_plan: item.action_plan,
+              tags: item.tags || [],
+              image_url: item.image_url
+            }));
+            set({ failures: formattedFailures });
+          }
         }
       }
     }),
